@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Calculator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #e8eef7;
+      font-family: Arial, sans-serif;
+    }
+
+    .calculator {
+      width: 320px;
+      max-width: 95%;
+      padding: 20px;
+      background: #172033;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px #0003;
+    }
+
+    h2 {
+      color: white;
+      text-align: center;
+      margin-top: 0;
+    }
+
+    #display {
+      width: 100%;
+      height: 75px;
+      margin-bottom: 15px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #0d1423;
+      color: white;
+      text-align: right;
+      font-size: 30px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+    }
+
+    button {
+      height: 55px;
+      border: none;
+      border-radius: 10px;
+      background: #35445e;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(1.2);
+    }
+
+    .operator {
+      background: #e69536;
+    }
+
+    .clear {
+      background: #d94b55;
+    }
+
+    .equals {
+      background: #22a06b;
+    }
+
+    .zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="calculator">
+    <h2>My Calculator</h2>
+
+    <input id="display" value="0" readonly
+      aria-label="Calculator display">
+
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">AC</button>
+      <button onclick="backspace()">⌫</button>
+      <button onclick="percent()">%</button>
+      <button class="operator" onclick="chooseOperator('/')">÷</button>
+
+      <button onclick="appendNumber('7')">7</button>
+      <button onclick="appendNumber('8')">8</button>
+      <button onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="chooseOperator('*')">×</button>
+
+      <button onclick="appendNumber('4')">4</button>
+      <button onclick="appendNumber('5')">5</button>
+      <button onclick="appendNumber('6')">6</button>
+      <button class="operator" onclick="chooseOperator('-')">−</button>
+
+      <button onclick="appendNumber('1')">1</button>
+      <button onclick="appendNumber('2')">2</button>
+      <button onclick="appendNumber('3')">3</button>
+      <button class="operator" onclick="chooseOperator('+')">+</button>
+
+      <button onclick="toggleSign()">±</button>
+      <button class="zero" onclick="appendNumber('0')">0</button>
+      <button onclick="appendDecimal()">.</button>
+      <button class="equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+
+    let current = "0";
+    let previous = null;
+    let operator = null;
+    let startNew = false;
+
+    function updateDisplay() {
+      display.value = current;
+    }
+
+    function appendNumber(number) {
+      if (startNew || current === "Error") {
+        current = number;
+        startNew = false;
+      } else if (current.length < 14) {
+        current = current === "0" ? number : current + number;
+      }
+
+      updateDisplay();
+    }
+
+    function appendDecimal() {
+      if (startNew || current === "Error") {
+        current = "0.";
+        startNew = false;
+      } else if (!current.includes(".")) {
+        current += ".";
+      }
+
+      updateDisplay();
+    }
+
+    function chooseOperator(nextOperator) {
+      if (current === "Error") return;
+
+      if (operator && !startNew) {
+        calculate();
+      }
+
+      previous = Number(current);
+      operator = nextOperator;
+      startNew = true;
+    }
+
+    function calculate() {
+      if (operator === null || previous === null ||
+          current === "Error") return;
+
+      const a = previous;
+      const b = Number(current);
+      let result;
+
+      switch (operator) {
+        case "+": result = a + b; break;
+        case "-": result = a - b; break;
+        case "*": result = a * b; break;
+        case "/":
+          if (b === 0) {
+            current = "Error";
+            previous = null;
+            operator = null;
+            startNew = true;
+            updateDisplay();
+            return;
+          }
+          result = a / b;
+          break;
+      }
+
+      current = String(Number(result.toPrecision(12)));
+      previous = null;
+      operator = null;
+      startNew = true;
+      updateDisplay();
+    }
+
+    function clearDisplay() {
+      current = "0";
+      previous = null;
+      operator = null;
+      startNew = false;
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (startNew || current === "Error") {
+        current = "0";
+        startNew = false;
+      } else {
+        current = current.length > 1
+          ? current.slice(0, -1)
+          : "0";
+      }
+
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      if (current === "Error") return;
+      if (Number(current) !== 0) {
+        current = String(-Number(current));
+      }
+      updateDisplay();
+    }
+
+    function percent() {
+      if (current === "Error") return;
+      current = String(Number(current) / 100);
+      updateDisplay();
+      startNew = true;
+    }
+  </script>
+</body>
+</html>
